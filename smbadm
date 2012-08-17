@@ -1,8 +1,0 @@
-#!/bin/bash
-
-if [ "$(ps -e | grep smbd)" != "" ]; then
-	pyNeighborhood
-else
-gksudo daemon samba start
-pyNeighborhood
-fi
