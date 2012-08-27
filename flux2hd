@@ -285,7 +285,6 @@ setvalues
 fi
 
 grubpart=$(echo $partition | grep -o [0-9])
-((grubpart--))
 grubnum=$(echo $partition | sed s/[0-9]// | sed "s/\/dev\/sd//g")
 case $grubnum in
 	a ) grubdisk="hd0" ;;
@@ -307,64 +306,54 @@ test -d $target || mkdir $target
 error
 
 echo "Installing Grub"
-grub-install --recheck --no-floppy --root-directory=$target --force-lba $(echo $partition | sed s/[0-9]//g)
+grub-install --recheck --target=i386-pc --root-directory=$target $(echo $partition | sed s/[0-9]//g)
+error
+mkdir -p /boot/grub/locale
+cp /usr/share/locale/en\@quot/LC_MESSAGES/grub.mo $target/boot/grub/locale/en.mo
 error
 
-mv $target/boot/grub/menu.lst $target/boot/grub/menu.lst.preflux
-
-echo "Generating grub.cfg"
-echo "Your existing menu has been renamed to menu.lst.preflux"
-
-echo "Config file for GRUB - The GNU GRand Unified Bootloader
-# /boot/grub/menu.lst
-
-# DEVICE NAME CONVERSIONS 
-#
-#  Linux           Grub
-# -------------------------
-#  /dev/fd0        (fd0)
-#  /dev/sda        (hd0)
-#  /dev/sdb2       (hd1,1)
-#  /dev/sda3       (hd0,2)
-#
-
-#  FRAMEBUFFER RESOLUTION SETTINGS
-#     +-------------------------------------------------+
-#          | 640x480    800x600    1024x768   1280x1024
-#      ----+--------------------------------------------
-#      256 | 0x301=769  0x303=771  0x305=773   0x307=775
-#      32K | 0x310=784  0x313=787  0x316=790   0x319=793
-#      64K | 0x311=785  0x314=788  0x317=791   0x31A=794
-#      16M | 0x312=786  0x315=789  0x318=792   0x31B=795
-#     +-------------------------------------------------+
-#  for more details and different resolutions see
-#  http://wiki.archlinux.org/index.php/GRUB#Framebuffer_Resolution 
-
-# general configuration:
-timeout   5
-default  0 
-color light-blue/black light-cyan/blue
-
-# boot sections follow
-# each is implicitly numbered from 0 in the order of appearance below
-#
-# TIP: If you want a 1024x768 framebuffer, add "vga=773" to your kernel line.
-#
-#-*
-
-# (0) Flux Linux
-title  $hostnm 
-root   ($grubdisk,$grubpart)
-kernel /boot/vmlinuz-linux root=$partition ro
+echo "#!/bin/sh
+echo \"Adding $hostname\"
+cat \<\< EOF
+menuentry \"$hostname\" \{
+set root=\($grubdisk,$grubpart\)
+linux /boot/vmlinuz-linux root=$partition 
 initrd /boot/initramfs-linux.img
+\}
+EOF" >> $target/etc/grub.d/05_linux
+chmod +x $target/etc/grub.d/05_linux
 
-# (1) Windows
-#title Windows
-#root	(hd0,1)
-#makeactive
-#chainloader +1" > $target/boot/grub/menu.lst
+winfullpart=$(fdisk -l | grep -i ntfs | grep -o -m 1 '/dev/sd[[:alpha:]][[:digit:]]')
+winnum=$(echo $winfullpart | sed s/[0-9]// | sed "s/\/dev\/sd//g")
+winpart=$(echo $winfullpart | grep -o [0-9])
 
-umount $target
+case $winnum in
+	a ) windisk="hd0" ;;
+	b ) windisk="hd1" ;;
+	c ) windisk="hd2" ;;
+	d ) windisk="hd3" ;;
+	e ) windisk="hd4" ;;
+	f ) windisk="hd5" ;;
+	g ) windisk="hd6" ;;
+	h ) windisk="hd7" ;;
+	i ) windisk="hd8" ;;
+	j ) windisk="hd9" ;;
+	* ) echo "windisk not set"; error ;;
+esac
+
+test -z $windisk || echo "#!/bin/sh
+echo \"Adding Windows Entry\"
+cat \<\< EOF
+menuentry \"Windows\" \{
+set root=\($windisk,$winpart\)
+chainloader \($windisk,$winpart\)\+1
+\}
+EOF" >> $target/etc/grub.d/50_windows
+chmod +x $target/etc/grub.d/50_windows
+
+prepchroot
+chroot $target grub-mkconfig -o /boot/grub/grub.cfg
+unmount
 echo "press [enter] to continue ..."
 read
 }
