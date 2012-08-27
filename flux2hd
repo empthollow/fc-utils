@@ -366,7 +366,7 @@ else
 selection=
 until [ "$selection" = "00" ]; do
 clear
-echo "                                   Flux Installer 2.2"
+echo "                                   Flux Installer $(pacman -Qs flux-utils-git | grep -o [0-9]*-[0-9])"
 echo ""
 echo "***********************************  VARIABLES  ***************************"
 echo "Username: $username"
