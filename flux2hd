@@ -132,7 +132,7 @@ error
 echo "# Create fstab, bookmarks and mount
 for dev in \$(ls /dev/disk/by-label/ | grep -v Flux_Capacity) ; do
         mkdir /media/\$dev
-        echo \"/dev/disk/by-label/\$dev /media/\$dev auto defaults,users,rw 0 0\" >> /etc/fstab
+        echo \"/dev/disk/by-label/\$dev /media/\$dev auto defaults,exec,users,rw 0 0\" >> /etc/fstab
         echo \"file:///media/\$dev \$dev\" >> /home/flux/.gtk-bookmarks
         echo \"\\\${if_mounted /media/\$dev}\\\${color gray}\$dev\\\${color #707070}: \\\$color\\\${fs_used /media/\$dev}/\\\${fs_size /media/\$dev} 
  \\\${color gray}Free\\\${color #707070}: \\\$color\\\${fs_free /media/\$dev} \\\${fs_bar /media/\$dev}\\\${endif}\" >> /etc/skel/.conkyrc
