@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ "$(ps -e | grep smbd)" != "" ]; then
+if [ -n "$(systemctl status smbd | grep inactive)" ]; then
 	pyNeighborhood
 else
 gksudo daemon samba start
