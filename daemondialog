@@ -10,43 +10,43 @@ fi
 }
 
 # get status of services
-if [ -z $( /etc/rc.d/nfs-common status | grep -o STARTED) ]; then
+if [ -n "$( systemctl status nfsd.service | grep inactive)" ]; then
 	nfscstat=False
 else
 	nfscstat=True
 fi
 
-if [ -z $( /etc/rc.d/nfs-server status | grep -o STARTED) ]; then
+if [ -n "$( systemctl status rpc-idmapd.service | grep inactive)" ]; then
 	nfsvstat=False
 else
 	nfsvstat=True
 fi
 	
-if [ -z "$(ps -e | grep smbd)" ]; then
+if [ -n "$(systemctl status smbd.service | grep inactive)" ]; then
 	smbstat="False"
 else
 	smbstat="True"
 fi
 
-if [ -z "$(ps -e | grep sshd)" ]; then
+if [ -n "$(systemctl status sshd.service | grep inactive)" ]; then
 	sshstat="False"
 else
 	sshstat="True"
 fi
 
-if [ -z "$(ps -e | grep cupsd)" ]; then
+if [ -n "$(systemctl status cupsd.service | grep inactive)" ]; then
 	cupsstat="False"
 else
 	cupsstat="True"
 fi
 
-if [ -z "$(ps -e | grep avahi-daemon)" ]; then
+if [ -n "$(systemctl status avahi-daemon.service | grep inactive)" ]; then
 	avahistat="False"
 else
 	avahistat="True"
 fi
 
-if [ -z "$(ps -e | grep bluetoothd)" ]; then
+if [ -n "$(systemctl status bluetooth.service | grep inactive)" ]; then
 	bluestat="False"
 else
 	bluestat="True"
@@ -79,26 +79,26 @@ blue=0
 
 for i in $input ; do
 	case $i in
-	nfs-common	)	nc=1; [ $nfscstat == True ] || gksudo /etc/rc.d/nfs-common start; error ;;
-	nfs-server	)	ns=1; [ $nfsvstat == True ] || gksudo /etc/rc.d/nfs-server start; error ;;
-	samba		)	smb=1; [ $smbstat == True ] || gksudo /etc/rc.d/samba start; error ;;
-	ssh		)	sshs=1; [ $sshstat == True ] || gksudo /etc/rc.d/sshd start; error ;;
-	cups		)	cups=1; [ $cupsstat == True ] || gksudo /etc/rc.d/cupsd start; error ;;
-	avahi		)	avahi=1; [ $avahistat == True ] || gksudo /etc/rc.d/avahi-daemon start; error ;;
-	bluetoothd	)	blue=1; [ $bluestat == True ] || gksudo /etc/rc.d/bluetooth start; error; blueman-applet;;
+	nfs-common	)	nc=1; [ $nfscstat == True ] || gksudo systemctl start nfsd.service; error ;;
+	nfs-server	)	ns=1; [ $nfsvstat == True ] || gksudo systemctl start idmapd.service start; gksudo systemctl start mountd.service;error ;;
+	samba		)	smb=1; [ $smbstat == True ] || gksudo systemctl start smbd.service; error ;;
+	ssh		)	sshs=1; [ $sshstat == True ] || gksudo systemctl start sshd; error ;;
+	cups		)	cups=1; [ $cupsstat == True ] || gksudo systemctl start cupsd.service; error ;;
+	avahi		)	avahi=1; [ $avahistat == True ] || gksudo systemctl start avahi-daemon.service; error ;;
+	bluetoothd	)	blue=1; [ $bluestat == True ] || gksudo systemctl start bluetooth.service start; error; blueman-applet;;
 	esac
 done
 
-[ $nc == 1 ] || [ $nfscstat == False ] || gksudo /etc/rc.d/nfs-common stop
+[ $nc == 1 ] || [ $nfscstat == False ] || gksudo systemctl stop nfsd.service
 error
-[ $ns == 1 ] || [ $nfsvstat == False ] || gksudo /etc/rc.d/nfs-server stop
+[ $ns == 1 ] || [ $nfsvstat == False ] || gksudo systemctl stop idmapd.service && gksudo systemctl stop mountd.service
 error
-[ $smb == 1 ] || [ $smbstat == False ] || gksudo /etc/rc.d/samba stop
+[ $smb == 1 ] || [ $smbstat == False ] || gksudo systemctl stop smbd.service
 error
-[ $sshs == 1 ] || [ $sshstat == False ] || gksudo /etc/rc.d/sshd stop
+[ $sshs == 1 ] || [ $sshstat == False ] || gksudo systemctl stop sshd.service
 error
-[ $cups == 1 ] || [ $cupsstat == False ] || gksudo /etc/rc.d/cupsd stop
+[ $cups == 1 ] || [ $cupsstat == False ] || gksudo systemctl stop cupsd
 error
-[ $avahi == 1 ] || [ $avahistat == False ] || gksudo /etc/rc.d/avahi-daemon stop
+[ $avahi == 1 ] || [ $avahistat == False ] || gksudo systemctl stop avahi-daemon.service
 error
-[ $blue == 1 ] || [ $bluestat == False ] || gksudo /etc/rc.d/bluetooth stop
+[ $blue == 1 ] || [ $bluestat == False ] || gksudo systemctls top bluetooth.service

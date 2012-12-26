@@ -13,7 +13,7 @@ case $1 in
 	-v		)	echo "Version 3.0"; exit 0 ;;
 esac
 
-if [ "$(ps -e | grep avahi-daemon)" != "" ]; then
+if [ -z "$(systemctl status avahi-daemon.service | grep inactive)" ]; then
         echo "Avahi Already Running"
 else
 gksudo daemon avahi-daemon start
