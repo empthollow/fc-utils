@@ -93,7 +93,7 @@ echo "3 - Swap: $swap"
 echo "4 - Mount Directory: $target"
 echo "5 - User's Groups: $groups"
 echo "6 - Hostname: $hostnm"
-echo "7 - Filesstem Type: $type"
+echo "7 - Filesstem Type: $fstype"
 echo "0 - Done"
 echo ""
 echo -n "Enter Selection >"
@@ -156,7 +156,7 @@ error
 sed -i '8,100 d' $target/etc/rc.local
 error
 echo "# Create fstab, bookmarks and mount
-for dev in \$(ls /dev/disk/by-label/ | grep -v Flux_Capacity) ; do
+for dev in \$(ls /dev/disk/by-label/ | grep -v FluxCapacity) ; do
         mkdir /media/\$dev
         echo \"/dev/disk/by-label/\$dev /media/\$dev auto defaults,exec,users,rw 0 0\" >> /etc/fstab
         echo \"file:///media/\$dev \$dev\" >> /home/flux/.gtk-bookmarks
@@ -217,7 +217,7 @@ echo -n "Is this correct? [y/n/e(edit)] >"
 fp=
 read fp
 case $fp in
-	y | Y	) umount $swap ; mkswap $swap ; umount /media/tmp ; umount $partition ; mkfs.$type -j -O dir_index -L $hostnm $partition ; echo "Done [Press Enter]"; read ;;
+	y | Y	) umount $swap ; mkswap $swap ; umount /media/tmp ; umount $partition ; mkfs.$fstype -j -O dir_index -L $hostnm $partition ; echo "Done [Press Enter]"; read ;;
 	n | N	) echo "NO CHANGES WERE MADE [Press Enter]" ; read ;;
 	e | E	) setvalues  ; formatparts ;; 
 	*	) echo "Try again [Press Enter]" ; read ; formatparts ;;
@@ -236,7 +236,7 @@ fi
 echo "Preparing"
 test -d /media/live || mkdir -p /media/live
 if [ -z "$(cat /proc/mounts | grep /media/live)" ]; then
-mount -v -r -o loop /dev/disk/by-label/Flux_Capacity /media/live
+mount -v -r -o loop /dev/disk/by-label/FluxCapacity /media/live
 fi
 test -d $target || mkdir -p $target
 mount $partition $target
