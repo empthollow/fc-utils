@@ -13,6 +13,7 @@ swap=$(fdisk -l | grep -m 1 swap | grep -o '/dev/sd[a-z][0-9]')
 target=/media/targethd
 groups=storage,floppy,optical,audio,video,network,games,wheel,disk
 hostnm=FluxCapacity
+fstype=ext4
 status=Complete
 arch=i686
 fi
@@ -53,9 +54,32 @@ target=$target
 groups=$groups
 hostnm=$hostnm
 status=$status
-arch=$arch" > /etc/conf.d/f2hdvar
+arch=$arch
+fstype=$fstype" > /etc/conf.d/f2hdvar
 }
 
+selecttype()
+{
+echo ""
+echo "1 - EXT2"
+echo "2 - EXT3"
+echo "3 - EXT4"
+echo "4 - XFS"
+echo "5 - ReiserFS"
+echo -n "Enter Selection >"
+typechoice=
+read typechoice
+case $typechoice in
+	1 ) fstype=ext2 ;;
+	2 ) fstype=ext3 ;;
+	3 ) fstype=ext4 ;;
+	4 ) fstype=xfs ;;
+	5 ) fstype=reiserfs ;;
+	* ) echo "Try Again"; selecttype ;;
+esac
+
+
+}
 setvalues()
 {
 setme=
@@ -69,6 +93,7 @@ echo "3 - Swap: $swap"
 echo "4 - Mount Directory: $target"
 echo "5 - User's Groups: $groups"
 echo "6 - Hostname: $hostnm"
+echo "7 - Filesstem Type: $type"
 echo "0 - Done"
 echo ""
 echo -n "Enter Selection >"
@@ -80,6 +105,7 @@ case $setme in
 	4	)	clear; echo -n "Enter Mount Directory >"; read target ;;
 	5	)	clear; echo -n "Enter Groups >"; read groups ;;
 	6	)	clear; echo -n "Enter Hostname >"; read hostnm ;;
+	7	)	clear; selecttype;;
 	0	)	writevar ; setme=0 ;;
 	*	)	echo "Try again [Press Enter]" ; read ;;
 esac
@@ -191,7 +217,7 @@ echo -n "Is this correct? [y/n/e(edit)] >"
 fp=
 read fp
 case $fp in
-	y | Y	) umount $swap ; mkswap $swap ; umount /media/tmp ; umount $partition ; mkfs.ext4 -j -O dir_index -L $hostnm $partition ; echo "Done [Press Enter]"; read ;;
+	y | Y	) umount $swap ; mkswap $swap ; umount /media/tmp ; umount $partition ; mkfs.$type -j -O dir_index -L $hostnm $partition ; echo "Done [Press Enter]"; read ;;
 	n | N	) echo "NO CHANGES WERE MADE [Press Enter]" ; read ;;
 	e | E	) setvalues  ; formatparts ;; 
 	*	) echo "Try again [Press Enter]" ; read ; formatparts ;;
@@ -208,17 +234,17 @@ fi
 
 #get live cd filesystem
 echo "Preparing"
-test -d /media/live || mkdir /media/live
+test -d /media/live || mkdir -p /media/live
 if [ -z "$(cat /proc/mounts | grep /media/live)" ]; then
 mount -v -r -o loop /dev/disk/by-label/Flux_Capacity /media/live
 fi
-test -d $target || mkdir $target
+test -d $target || mkdir -p $target
 mount $partition $target
 echo "Getting Filesystem image"
 unsquashfs -f -d $target /media/live/fluxstall/i686/root-image.fs.sfs
 error
 umount /media/live
-test -d /media/tmp || mkdir /media/tmp
+test -d /media/tmp || mkdir -p /media/tmp
 error
 mount -t ext4 $target/root-image.fs /media/tmp
 error
@@ -238,7 +264,7 @@ unmount
 
 installfresh()
 {
-test -d $target || mkdir $target
+test -d $target || mkdir -p $target
 mount $partition $target
 mkdir -p $target/var/lib/pacman 
 pacman -Sy -r $target
@@ -375,6 +401,7 @@ echo "Swap: $swap"
 echo "Mount Directory: $target"
 echo "Users Groups: $groups"
 echo "Host Name: $hostnm"
+echo "Filesystem Type: $fstype"
 echo "***************************************************************************"
 echo ""
 echo "1  - Partition with cfdisk"
