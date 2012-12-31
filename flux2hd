@@ -29,14 +29,13 @@ fi
 
 unmount()
 {
-# unmount
 echo "Unmounting File Systems"
 umount $target/proc
 umount $target/sys
 umount $target/dev
 umount /media/live
-umount /dev/loop0
-umount /media/mnt
+umount /media/tmp
+umount /media/rtimage
 umount $target
 
 echo "Installation $status [Press Enter]"
@@ -165,6 +164,7 @@ chcmds()
 # excecute chroot commands
 echo "Generating Locals"
 edlo=
+echo -n "locale is set to en_US-UTF-8"
 echo -n "Edit locale.gen? [(v)im/n(a)no/(N)o] >"
 read edlo
 case $edlo in
@@ -180,7 +180,7 @@ echo "Configuring Sound"
 chroot $target amixer set PCM 100% unmute
 chroot $target amixer set Master 90% unmute
 chroot $target alsactl store
-echo "adding User"
+echo "Adding $username"
 chroot $target useradd -u 1000 -g users -G $groups -m $username
 error
 
@@ -188,9 +188,12 @@ error
 
 setpass()
 {
+echo -n "Choose password for $username"
 chroot $target passwd $username
 [ "$?" = "0" ] || setpass
-
+echo -n "Choose password for root"
+chroot $target passwd root
+[ "$?" = "0" ] || chroot $target passwd root
 }
 
 
