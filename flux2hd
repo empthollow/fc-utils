@@ -231,18 +231,18 @@ mount -v -r -o loop /dev/disk/by-label/FluxCapacity /media/live
 fi
 test -d $target || mkdir -p $target
 mount $partition $target
-echo "Getting Filesystem image"
-unsquashfs -f -d $target /media/live/fluxstall/i686/root-image.fs.sfs
-error
-umount /media/live
 test -d /media/tmp || mkdir -p /media/tmp
+test -d /media/rtimage || mkdir -p /media/rtimage
 error
-mount -t ext4 $target/root-image.fs /media/tmp
+mount -o loop /media/live/fluxstall/i686/root-image.fs.sfs /media/tmp
+mount -o loop /media/tmp/root-image.fs /media/rtimage
 error
 echo "Coping Files....."
-cp -ar /media/tmp/* $target
+cp -ar /media/rtimage/* $target
 error
-rm $target/root-image.fs
+umount /media/rtimage
+umount /media/tmp
+umount /media/live
 
 prepchroot
 filemods
