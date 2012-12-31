@@ -127,9 +127,6 @@ filemods()
 {
 # File System Modifications for permanent install
 echo "File Mods"
-sed -i 's/!alsa/alsa/g' $target/etc/rc.conf
-sed -i 's/!crond/crond/g' $target/etc/rc.conf
-error
 sed -i '/aufs/d' $target/etc/fstab
 error
 echo "$partition		/		auto	defaults	0	0" >> $target/etc/fstab
@@ -138,13 +135,7 @@ echo "/dev/cdrom		/media/cd		auto		ro,user,noauto	0	0" >> $target/etc/fstab
 error
 echo "/dev/dvd		/media/dvd		auto		ro,user,noauto	0	0" >> $target/etc/fstab
 error
-sed -i 's/FluxCapacity/'$hostnm'/g' $target/etc/rc.conf
-error
-sed -i '27 s/^#//' $target/etc/inittab
-error
-sed -i '28 s/c1/#c1/' $target/etc/inittab
-error
-sed -i '28 s/flux/$userneme/' $target/etc/inittab
+echo $hostnm > $target/etc/hostname
 error
 battery=$(ls /sys/class/power_supply | grep BAT)
 if [ -n $battery ]; then
