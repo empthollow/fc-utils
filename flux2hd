@@ -217,7 +217,7 @@ echo -n "Is this correct? [y/n/e(edit)] >"
 fp=
 read fp
 case $fp in
-	y | Y	) umount $swap ; mkswap $swap ; umount /media/tmp ; umount $partition ; mkfs.$fstype -j -O dir_index -L $hostnm $partition ; echo "Done [Press Enter]"; read ;;
+	y | Y	) umount $swap ; mkswap $swap ; umount /media/tmp ; umount $partition ; mkfs.$fstype -j -O dir_index -L "$hostnmHD" $partition ; echo "Done [Press Enter]"; read ;;
 	n | N	) echo "NO CHANGES WERE MADE [Press Enter]" ; read ;;
 	e | E	) setvalues  ; formatparts ;; 
 	*	) echo "Try again [Press Enter]" ; read ; formatparts ;;
