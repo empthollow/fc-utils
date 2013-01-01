@@ -180,7 +180,7 @@ echo "Configuring Sound"
 chroot $target amixer set PCM 100% unmute
 chroot $target amixer set Master 90% unmute
 chroot $target alsactl store
-echo "Adding $username"
+echo "Adding $username" 
 chroot $target useradd -u 1000 -g users -G $groups -m $username
 error
 
@@ -188,10 +188,10 @@ error
 
 setpass()
 {
-echo -n "Choose password for $username"
+echo "Choose password for $username" 
 chroot $target passwd $username
 [ "$?" = "0" ] || setpass
-echo -n "Choose password for root"
+echo "Choose password for root" 
 chroot $target passwd root
 [ "$?" = "0" ] || chroot $target passwd root
 }
@@ -255,7 +255,7 @@ else
 fi
 sleep 1
 done
-
+\n
 umount /media/rtimage
 umount /media/tmp
 umount /media/live
