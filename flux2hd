@@ -30,13 +30,13 @@ fi
 unmount()
 {
 echo "Unmounting File Systems"
-umount $target/proc
-umount $target/sys
-umount $target/dev
-umount /media/live
-umount /media/tmp
-umount /media/rtimage
-umount $target
+umount $target/proc > /dev/null
+umount $target/sys > /dev/null
+umount $target/dev > /dev/null
+umount /media/live > /dev/null
+umount /media/tmp > /dev/null
+umount /media/rtimage > /dev/null
+umount $target > /dev/null
 
 echo "Installation $status [Press Enter]"
 read
