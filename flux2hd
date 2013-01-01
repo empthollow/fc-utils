@@ -211,7 +211,7 @@ echo -n "Is this correct? [y/n/e(edit)] >"
 fp=
 read fp
 case $fp in
-	y | Y	) umount $swap ; mkswap $swap ; umount /media/tmp ; umount $partition ; mkfs.$fstype -j -O dir_index -L "$hostnmHD" $partition ; echo "Done [Press Enter]"; read ;;
+	y | Y	) umount $swap ; swapoff $swap ; mkswap $swap ; umount /media/tmp ; umount $partition ; mkfs.$fstype -j -O dir_index -L "$hostnmHD" $partition ; echo "Done [Press Enter]"; read ;;
 	n | N	) echo "NO CHANGES WERE MADE [Press Enter]" ; read ;;
 	e | E	) setvalues  ; formatparts ;; 
 	*	) echo "Try again [Press Enter]" ; read ; formatparts ;;
@@ -230,7 +230,7 @@ fi
 echo "Preparing"
 test -d /media/live || mkdir -p /media/live
 if [ -z "$(cat /proc/mounts | grep /media/live)" ]; then
-mount -v -r -o loop /dev/disk/by-label/FluxCapacity /media/live
+mount -v -r -o loop /dev/disk/by-label/FluxCapacity /media/live > /dev/null
 fi
 test -d $target || mkdir -p $target
 mount $partition $target
@@ -240,19 +240,18 @@ error
 mount -o loop /media/live/fluxstall/i686/root-image.fs.sfs /media/tmp
 mount -o loop /media/tmp/root-image.fs /media/rtimage
 error
-#echo "Coping Files....."
-cp -ar /media/rtimage/* $target
-error
+echo "Preparing to Copy Files....."
 total=$(ls -lR /media/rtimage/ | wc -c)
-dest=0
 echo -n "Copying Files"
+cp -ar /media/rtimage/* $target &
+dest=0
 while [ $total -gt $dest ] ; do
 	dest=$(ls -lR $target | wc -c)
 	pct=$(((100 * $dest ) / $total ))
 if [ $pct -lt 10 ] ; then
-	echo -en "# $pct%\b\b\b\b"
+	echo -en "> $pct%\b\b\b\b"
 else
-	echo -en "# $pct%\b\b\b\b\b"
+	echo -en "> $pct%\b\b\b\b\b"
 fi
 sleep 1
 done
