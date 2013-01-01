@@ -240,9 +240,23 @@ error
 mount -o loop /media/live/fluxstall/i686/root-image.fs.sfs /media/tmp
 mount -o loop /media/tmp/root-image.fs /media/rtimage
 error
-echo "Coping Files....."
+#echo "Coping Files....."
 cp -ar /media/rtimage/* $target
 error
+total=$(ls -lR /media/rtimage/ | wc -c)
+dest=0
+echo -n "Copying Files"
+while [ $total -gt $dest ] ; do
+	dest=$(ls -lR $target | wc -c)
+	pct=$(((100 * $dest ) / $total ))
+if [ $pct -lt 10 ] ; then
+	echo -en "# $pct%\b\b\b\b"
+else
+	echo -en "# $pct%\b\b\b\b\b"
+fi
+sleep 1
+done
+
 umount /media/rtimage
 umount /media/tmp
 umount /media/live
@@ -291,7 +305,6 @@ esac
 chcmds
 setpass
 
-# unmount
 unmount
 }
 
