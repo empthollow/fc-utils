@@ -9,7 +9,7 @@ else
 username=flux
 password=password
 partition=/dev/sdxx
-swap=$(fdisk -l | grep -m 1 swap | grep -o '/dev/sd[a-z][0-9]')
+swap=/dev/sda$(test -n $(parted -s /dev/sda print | grep -m 1 swap | cut -c 2-3) || echo "x")
 target=/media/targethd
 groups=storage,floppy,optical,audio,video,network,games,wheel,disk
 hostnm=FluxCapacity
@@ -271,11 +271,17 @@ unmount
 
 installfresh()
 {
+bits=n
+echo -n "Is this a 64 bit system? (y/n) >"
+read bits
+if [ "$bits" == "y" ]; then
+	sed -i '29 s/i686/x86_64/' /etc/pacman.conf 
+fi
 test -d $target || mkdir -p $target
 mount $partition $target
 mkdir -p $target/var/lib/pacman 
 pacman -Sy -r $target
-mkdir -p ${new_arch}/var/cache/pacman/pkg
+mkdir -p $target/var/cache/pacman/pkg
 pacman  -Su base --cachedir $target/var/cache/pacman/pkg -r $target
 prepchroot
 cp /etc/pacman.d/mirrorlist $target/etc/pacman.d/
@@ -344,13 +350,13 @@ mkdir -p /boot/grub/locale
 cp /usr/share/locale/en\@quot/LC_MESSAGES/grub.mo $target/boot/grub/locale/en.mo
 error
 
-echo "#!/bin/sh
+echo "#!\/bin\/sh
 echo \"Adding $hostname\"
 cat \<\< EOF
 menuentry \"$hostname\" \{
 set root=\($grubdisk,$grubpart\)
-linux /boot/vmlinuz-linux root=$partition 
-initrd /boot/initramfs-linux.img
+linux \/boot\/vmlinuz-linux root=$partition 
+initrd \/boot\/initramfs-linux.img
 \}
 EOF" >> $target/etc/grub.d/05_linux
 chmod +x $target/etc/grub.d/05_linux
@@ -413,7 +419,8 @@ echo ""
 echo "1  - Partition with cfdisk"
 echo "2  - Format Partitions"
 echo "3  - Install to HD (As on cd)"
-echo "4  - Install grub"
+echo "4  - Install Fresh from Repositories"
+echo "5  - Install grub"
 echo "0  - Change Variables"
 echo "00 - Exit"
 echo ""
@@ -423,7 +430,8 @@ echo -n "Enter Selection >"
 	1 	) cfdisk ;;
 	2	) formatparts ;;
 	3	) installcd ;;
-	4	) grubins ;;
+	4	) installfresh ;;
+	5	) grubins ;;
 	0	) setvalues ;;
 	00 	) clear; exit ;;
 	* 	) echo "Please enter a valid selection [ Press Enter ]" ; read ;;
