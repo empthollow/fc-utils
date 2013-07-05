@@ -304,7 +304,7 @@ read modme
 
 case $modme in
 	n | N	)	;;
-	*	)	tar -xf /etc/overlay.tar.gz -C $target ; filemods ;;
+	*	)	tar -xf /etc/overlay.tar.gz -C $target --strip-components=1 ; filemods ;;
 esac
 
 chcmds
@@ -350,15 +350,15 @@ mkdir -p /boot/grub/locale
 cp /usr/share/locale/en\@quot/LC_MESSAGES/grub.mo $target/boot/grub/locale/en.mo
 error
 
-echo "#!\/bin\/sh
-echo \"Adding $hostname\"
-cat \<\< EOF
-menuentry \"$hostname\" \{
-set root=\($grubdisk,$grubpart\)
-linux \/boot\/vmlinuz-linux root=$partition 
-initrd \/boot\/initramfs-linux.img
-\}
-EOF" >> $target/etc/grub.d/05_linux
+echo "#!/bin/sh
+echo \"Adding $hostnm\"
+cat << EOF
+menuentry \"$hostnm\" {
+set root=($grubdisk,$grubpart)
+linux /boot/vmlinuz-linux root=$partition 
+initrd /boot/initramfs-linux.img
+}
+EOF" > $target/etc/grub.d/05_linux
 chmod +x $target/etc/grub.d/05_linux
 
 winfullpart=$(fdisk -l | grep -i ntfs | grep -o -m 1 '/dev/sd[[:alpha:]][[:digit:]]')
