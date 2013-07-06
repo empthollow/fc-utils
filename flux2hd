@@ -156,6 +156,7 @@ mount -a
 updatedb &
 sed -i '8,30 d' /etc/rc.local" >> $target/etc/rc.local
 error
+sed -i s/flux/$username/g $target/etc/slim.conf
 
 }
 
