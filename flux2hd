@@ -381,13 +381,15 @@ esac
 
 test -z $windisk || echo "#!/bin/sh
 echo \"Adding Windows Entry\"
-cat \<\< EOF
-menuentry \"Windows\" \{
-set root=\($windisk,$winpart\)
-chainloader \($windisk,$winpart\)\+1
-\}
-EOF" >> $target/etc/grub.d/50_windows
-chmod +x $target/etc/grub.d/50_windows
+cat << EOF
+menuentry \"Windows\" {
+set root=($windisk,$winpart)
+chainloader ($windisk,$winpart)\+1
+}
+EOF" > $target/etc/grub.d/50_windows
+if [ -e /etc/grub.d/50_windows ]; then
+	 chmod +x $target/etc/grub.d/50_windows
+fi
 
 prepchroot
 chroot $target grub-mkconfig -o /boot/grub/grub.cfg
