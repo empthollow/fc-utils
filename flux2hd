@@ -152,6 +152,7 @@ for dev in \$(ls /dev/disk/by-label/ | grep -v FluxCapacity) ; do
         echo \"file:///media/\$dev \$dev\" >> /home/flux/.gtk-bookmarks
         echo \"\\\${if_mounted /media/\$dev}\\\${color gray}\$dev\\\${color #707070}: \\\$color\\\${fs_used /media/\$dev}/\\\${fs_size /media/\$dev} 
  \\\${color gray}Free\\\${color #707070}: \\\$color\\\${fs_free /media/\$dev} \\\${fs_bar /media/\$dev}\\\${endif}\" >> /etc/skel/.conkyrc
+done
 mount -a
 updatedb &
 sed -i '8,30 d' /etc/rc.local" >> $target/etc/rc.local
