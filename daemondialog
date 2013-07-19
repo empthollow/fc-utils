@@ -52,6 +52,11 @@ else
 	bluestat="True"
 fi
 
+if [ -n "$(systemctl status x11vnc.service | grep inactive)" ]; then
+	x11srvstat="False"
+else
+	x11srvstat="True"
+fi
 # create window
 input=$(yad --width=500 --height=300 --list \
 	  --separator=" " \
@@ -67,7 +72,8 @@ input=$(yad --width=500 --height=300 --list \
 	    $sshstat "ssh" "Secure Shell Server" \
 	    $cupsstat "cups" "Printing Services" \
 	    $avahistat "avahi" "AVAHI DNS Daemon" \
-	    $bluestat "bluetoothd" "Bluetooth Daemon")
+	    $bluestat "bluetoothd" "Bluetooth Daemon"\
+	    $x11srvstat "x11srv" "X11 VNC Server")
 error
 nc=0
 ns=0
@@ -76,6 +82,7 @@ sshs=0
 cups=0
 avahi=0
 blue=0
+x11srv=0
 
 for i in $input ; do
 	case $i in
@@ -86,6 +93,8 @@ for i in $input ; do
 	cups		)	cups=1; [ $cupsstat == True ] || gksudo systemctl start cupsd.service; error ;;
 	avahi		)	avahi=1; [ $avahistat == True ] || gksudo systemctl start avahi-daemon.service; error ;;
 	bluetoothd	)	blue=1; [ $bluestat == True ] || gksudo systemctl start bluetooth.service start; error; blueman-applet;;
+	x11srv		)	x11srv=1; [ $x11srvstat == True ] || gksudo systemctl start x11vnc.servicer start; error;
+	
 	esac
 done
 
@@ -101,4 +110,6 @@ error
 error
 [ $avahi == 1 ] || [ $avahistat == False ] || gksudo systemctl stop avahi-daemon.service
 error
-[ $blue == 1 ] || [ $bluestat == False ] || gksudo systemctls top bluetooth.service
+[ $blue == 1 ] || [ $bluestat == False ] || gksudo systemctl stop bluetooth.service
+error
+[ $x11srv == 1 ] || [ $x11srvstat == False ] || gksudo systemctl stop x11vnc.service
