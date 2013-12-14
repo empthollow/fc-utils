@@ -17,7 +17,7 @@ fstype=ext4
 status=Complete
 arch=i686
 fi
-insver=$(pacman -Qs flux-utils-git | grep -o [0-9]*-[0-9])
+insver=$(pacman -Qys flux-utils-git | grep -o [0-9]*-[0-9])
 error()
 {
 if [ "$?" != "0" ]; then
@@ -166,7 +166,7 @@ chcmds()
 # excecute chroot commands
 echo "Generating Locals"
 edlo=
-echo -n "locale is set to en_US-UTF-8"
+echo "locale is set to en_US-UTF-8"
 echo -n "Edit locale.gen? [(v)im/n(a)no/(N)o] >"
 read edlo
 case $edlo in
@@ -183,6 +183,7 @@ chroot $target amixer set PCM 100% unmute
 chroot $target amixer set Master 90% unmute
 chroot $target alsactl store
 echo "Adding $username" 
+chroot $target userdel -r flux
 chroot $target useradd -u 1000 -g users -G $groups -m $username
 error
 
@@ -239,7 +240,7 @@ mount $partition $target
 test -d /media/tmp || mkdir -p /media/tmp
 test -d /media/rtimage || mkdir -p /media/rtimage
 error
-mount -o loop /media/live/fluxstall/i686/root-image.fs.sfs /media/tmp
+mount -o loop /media/live/flux/any/root-image.fs.sfs /media/tmp
 mount -o loop /media/tmp/root-image.fs /media/rtimage
 error
 echo "Preparing to Copy Files....."
